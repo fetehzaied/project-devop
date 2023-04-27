@@ -66,9 +66,9 @@ pipeline {
         stage('pushing Image'){
         steps{
              script{
-          sh 'docker login -u "" -p "" docker.io'
-          sh 'docker tag backend:latest dhouha20/backend:latest'
-           sh ' docker push dhouha20/backend:latest'
+          sh 'docker login -u "fatehzaied" -p "ca987654321" docker.io'
+          sh 'docker tag backend:latest fatehzaied/backend:latest'
+           sh ' docker push fatehzaied/backend:latest'
 }
 }
 }
