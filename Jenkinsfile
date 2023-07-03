@@ -1,90 +1,46 @@
 pipeline {
-     agent any
- 
-   stages{
-       
-        stage('MVN CLEAN') {
+    agent any
+
+    stages {
+        stage("Clone repo") {
             steps {
-               sh' mvn clean install -DskipTests' 
-               
+                script {
+                    // Let's clone the source
+                    git 'https://github.com/fetehzaied/project-devop.git'
+                }
             }
         }
-        stage('MVN COMPILE') {
-                steps {
-               
-                 sh 'mvn compile'
-                }
-                }
-           
-         
-           stage('Build'){
-            steps{
-                sh 'mvn package -DskipTests'
-            }
-         }
- 
-        stage('MVN TEST') {
+
+        stage("Maven build") {
             steps {
-                sh 'mvn test -DskipTests'
+                script {
+                    sh "mvn package -DskipTests=true"
+                }
             }
         }
-       
-        /*stage('Test & Jacoco Static Analysis') {
+
+        stage("Test stage") {
             steps {
-            junit 'src/reports/*.xml'
-            jacoco()
+                script {
+                    sh "mvn test"
+                }
             }
-        }*/
-       
-                  stage ('MVN SONARQUBE') {
-//    def scannerHome = tool 'SonarScanner 4.0';
-        steps{
-        withSonarQubeEnv('sonarqube.8.9.7') {
-        // If you have configured more than one global server connection, you can specify its name
-//      sh "${scannerHome}/bin/sonar-scanner"
-        sh "mvn sonar:sonar"
+        }
+
+        stage("Sonar metrics") {
+            steps {
+                script {
+                    sh "mvn sonar:sonar"
+                }
+            }
+        }
+
+        stage("Deployment stage") {
+            steps {
+                script {
+                    sh 'mvn clean package deploy:deploy-file -DgroupId=tn.esprit -DartifactId=ExamThourayaS2 -Dversion=1.0 -DgeneratePom=true -Dpackaging=jar -DrepositoryId=deploymentRepo -Durl=http://192.168.1.244:8081/repository/maven-releases/ -Dfile=target/ExamThourayaS2-0.0.1-SNAPSHOT.jar'
+                }
+            }
+        }
     }
-        }
-        }
-        
-       
-       
-       
-        stage('nexus deploy') {
-        steps{
-            sh'mvn deploy -DskipTests '
-           
-        }
-        }
-         stage('Builidng image') {
-        steps{
-            sh 'docker build -t tpachatproject . '
-           
-        }
-        }
-       
-        stage('pushing Image'){
-        steps{
-             script{
-          sh 'docker login -u "fatehzaied" -p "ca987654321" docker.io'
-          sh 'docker tag backend:latest fatehzaied/backend:latest'
-           sh ' docker push fatehzaied/backend:latest'
-}
-}
-}
-       stage('deploy image') {
-        steps{
-            sh 'docker-compose up -d'
-           
-        }
-        }
-       
-       
-       
-         }
-         /* post {
-        always {
-            junit 'src/reports/*.xml'
-        }
-    }*/
 }
