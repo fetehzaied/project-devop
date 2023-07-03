@@ -27,13 +27,20 @@ public class VoyageServiceImpl implements IVoyageService {
     }
 
 
-    public void affecterTrainAVoyage(Long idTrain, Long idVoyage) {
+ public void affecterTrainAVoyage(Long idTrain, Long idVoyage) {
+    Optional<Train> optionalTrain = trainRepository.findById(idTrain);
+    Optional<Voyage> optionalVoyage = voyageRepository.findById(idVoyage);
 
-        Train t = trainRepository.findById(idTrain).get();
-        Voyage v = voyageRepository.findById(idVoyage).get();
+    if (optionalTrain.isPresent() && optionalVoyage.isPresent()) {
+        Train t = optionalTrain.get();
+        Voyage v = optionalVoyage.get();
         v.setTrain(t);
         voyageRepository.save(v);
+    } else {
+        // Handle the case when the optional values are not present (e.g., throw an exception or log an error)
     }
+}
+
 
     @Override
     public List<Voyage> recupererAll() {
