@@ -45,24 +45,29 @@ public class TrainServiceImpl implements ITrainService {
         trainRepository.save(t);
     }
 
-    public int TrainPlacesLibres(Ville nomGareDepart) {
-        int cpt = 0;
-        int occ = 0;
-        List<Voyage> listvoyage = (List<Voyage>) voyageRepository.findAll();
-        System.out.println("tailee" + listvoyage.size());
-
-        for (int i = 0; i < listvoyage.size(); i++) {
-            System.out.println("gare" + nomGareDepart + "value" + listvoyage.get(0).getGareDepart());
-            if (listvoyage.get(i).getGareDepart() == nomGareDepart) {
-                cpt = cpt + listvoyage.get(i).getTrain().getNbPlaceLibre();
-                occ = occ + 1;
-                System.out.println("cpt " + cpt);
-            } else {
-
-            }
+  public int TrainPlacesLibres(Ville nomGareDepart) {
+    int cpt = 0;
+    int occ = 0;
+    List<Voyage> listvoyage = (List<Voyage>) voyageRepository.findAll();
+    System.out.println("tailee" + listvoyage.size());
+    for (int i = 0; i < listvoyage.size(); i++) {
+        System.out.println("gare" + nomGareDepart + "value" + listvoyage.get(0).getGareDepart());
+        if (listvoyage.get(i).getGareDepart() == nomGareDepart) {
+            cpt = cpt + listvoyage.get(i).getTrain().getNbPlaceLibre();
+            occ = occ + 1;
+            System.out.println("cpt " + cpt);
         }
-        return cpt / occ;
     }
+    
+    
+    if (occ != 0) {
+        return cpt / occ;
+    } else {
+        
+        return 0; // Default value
+    }
+}
+
 
 
     public List<Train> ListerTrainsIndirects(Ville nomGareDepart, Ville nomGareArrivee) {
@@ -91,24 +96,28 @@ public class TrainServiceImpl implements ITrainService {
     }
 
 
-    @Transactional
-    public void affecterTainAVoyageur(Long idVoyageur, Ville nomGareDepart, Ville nomGareArrivee, double heureDepart) {
-
-
-        System.out.println("taille test");
-        Voyageur c = VoyageurRepository.findById(idVoyageur).get();
-        List<Voyage> lesvoyages = new ArrayList<>();
-        lesvoyages = voyageRepository.RechercheVoyage(nomGareDepart, nomGareDepart, heureDepart);
+@Transactional
+public void affecterTainAVoyageur(Long idVoyageur, Ville nomGareDepart, Ville nomGareArrivee, double heureDepart) {
+    System.out.println("taille test");
+    Optional<Voyageur> optionalVoyageur = VoyageurRepository.findById(idVoyageur);
+    if (optionalVoyageur.isPresent()) {
+        Voyageur c = optionalVoyageur.get();
+        List<Voyage> lesvoyages = voyageRepository.RechercheVoyage(nomGareDepart, nomGareDepart, heureDepart);
         System.out.println("taille" + lesvoyages.size());
         for (int i = 0; i < lesvoyages.size(); i++) {
             if (lesvoyages.get(i).getTrain().getNbPlaceLibre() != 0) {
                 lesvoyages.get(i).getMesVoyageurs().add(c);
                 lesvoyages.get(i).getTrain().setNbPlaceLibre(lesvoyages.get(i).getTrain().getNbPlaceLibre() - 1);
-            } else
-                System.out.print("Pas de place disponible pour " + VoyageurRepository.findById(idVoyageur).get().getNomVoyageur());
+            } else {
+                System.out.print("Pas de place disponible pour " + c.getNomVoyageur());
+            }
             voyageRepository.save(lesvoyages.get(i));
         }
+    } else {
+        // Handle the case when the optional value is not present (e.g., throw an exception or log an error)
     }
+}
+
 
     @Override
     public void DesaffecterVoyageursTrain(Ville nomGareDepart, Ville nomGareArrivee, double heureDepart) {
