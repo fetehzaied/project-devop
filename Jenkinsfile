@@ -27,14 +27,14 @@ pipeline {
             }
         }
 
-    
-
-        stage("Deployment stage") {
+        stage("sonar ") {
             steps {
                 script {
-                    sh 'mvn clean package deploy:deploy-file -DgroupId=tn.esprit -DartifactId=ExamThourayaS2 -Dversion=1.0 -DgeneratePom=true -Dpackaging=jar -DrepositoryId=deploymentRepo -Durl=http://192.168.1.244:8081/repository/maven-releases/ -Dfile=target/ExamThourayaS2-0.0.1-SNAPSHOT.jar'
+                    "mvn sonar:sonar"
                 }
             }
         }
+
+     
     }
 }
