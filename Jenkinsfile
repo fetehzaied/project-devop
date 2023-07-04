@@ -26,7 +26,13 @@ pipeline {
                 }
             }
         }
-  
+     stage("Test stage") {
+            steps {
+                script {
+                    sh "mvn sonar:sonar"
+                }
+            }
+        }
       
    stage("Deployment stage") {
             steps {
